@@ -471,8 +471,12 @@ if ($action == 'feed')
 // Show users online
 else if ($action == 'online' || $action == 'online_full')
 {
-	// Load the index.php language file
-	require PUN_ROOT.'lang/'.$pun_config['o_default_lang'].'/index.php';
+$lang = preg_replace('/[^a-zA-Z0-9_-]/', '', $pun_config['o_default_lang']);
+
+if (!file_exists(PUN_ROOT.'lang/'.$lang.'/index.php'))
+    $lang = 'English';
+
+require PUN_ROOT.'lang/'.$lang.'/index.php';
 
 	// Fetch users online info and generate strings for output
 	$num_guests = $num_users = 0;
