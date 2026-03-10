@@ -47,14 +47,15 @@ setlocale(LC_CTYPE, 'C');
 // If we've been passed a default language, use it
 $install_lang = isset($_REQUEST['install_lang']) ? pun_trim($_REQUEST['install_lang']) : 'English';
 
-// Make sure we got a valid language string
-$install_lang = preg_replace('%[\.\\\/]%', '', $install_lang);
+$install_lang_files = array();
+foreach (forum_list_langs() as $available_lang)
+	$install_lang_files[$available_lang] = PUN_ROOT.'lang/'.$available_lang.'/install.php';
 
-// If such a language pack doesn't exist, or isn't up-to-date enough to translate this page, default to English
-if (!file_exists(PUN_ROOT.'lang/'.$install_lang.'/install.php'))
+// Only load install translations from the discovered language pack allowlist
+if (!isset($install_lang_files[$install_lang]) || !file_exists($install_lang_files[$install_lang]))
 	$install_lang = 'English';
 
-require PUN_ROOT.'lang/'.$install_lang.'/install.php';
+require $install_lang_files[$install_lang];
 
 if (file_exists(PUN_ROOT.'config.php'))
 {
@@ -535,7 +536,7 @@ else
 		$result = $db->query('SELECT 1 FROM '.$db_prefix.'users WHERE id=1');
 		if ($db->has_rows($result))
 			error(sprintf($lang_install['Existing table error'], $db_prefix, $db_name));
-	} catch (Throwable) {}
+	} catch (Exception $e) {}
 
 	// Check if InnoDB is available
 	if ($db_type == 'mysqli_innodb')
